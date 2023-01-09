@@ -35,6 +35,8 @@ class _MyHomePageState extends State<MyHomePage> {
     var height = MediaQuery.of(context).size.height;
     var width = MediaQuery.of(context).size.width;
 
+    
+
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
@@ -46,7 +48,7 @@ class _MyHomePageState extends State<MyHomePage> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: const [
-              Text("asds"),
+        
             ],
           )),
           GestureDetector(
