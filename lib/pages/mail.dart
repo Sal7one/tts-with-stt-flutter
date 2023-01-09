@@ -1,6 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import '../models/SpeachManager.dart';
+import 'package:speech_to_text/speech_recognition_result.dart';
+import 'package:speech_to_text/speech_to_text.dart';
+import 'package:text_to_speech/text_to_speech.dart';
 
 class Mail extends StatefulWidget {
   const Mail({Key? key}) : super(key: key);
@@ -10,32 +12,73 @@ class Mail extends StatefulWidget {
 }
 
 class _MailState extends State<Mail> {
+  var textEmail = "";
+  var textSubject = "";
+  var textBody = "";
+
+  late TextToSpeech tts = TextToSpeech();
+  late SpeechToText speechToText = SpeechToText();
+
+  void askBody() async {
+    tts.speak("What Is Body of email");
+    await Future.delayed(const Duration(seconds: 5), () async {
+      await speechToText.listen(onResult: (result) {
+        setState(() {
+          textBody = result.recognizedWords;
+        });
+
+        Future.delayed(const Duration(seconds: 5), () async {
+          // Send mail
+        });
+      });
+    });
+  }
+
+  void askSubject() async {
+    tts.speak("What Is Subject of  email");
+    await Future.delayed(const Duration(seconds: 5), () async {
+      await speechToText.listen(onResult: (result) {
+        setState(() {
+          textSubject = result.recognizedWords;
+        });
+
+        Future.delayed(const Duration(seconds: 5), () async {
+          askBody();
+        });
+      });
+    });
+  }
+
+  void askEmail() async {
+    tts.speak("What Is recipient email");
+    await Future.delayed(const Duration(seconds: 5), () async {
+      await speechToText.listen(onResult: (result) {
+        setState(() {
+          textEmail = result.recognizedWords;
+        });
+
+        Future.delayed(const Duration(seconds: 5), () async {
+          askSubject();
+        });
+      });
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    speechToText.initialize();
+    tts.stop();
+    askEmail();
+  }
+
   @override
   Widget build(BuildContext context) {
     var height = MediaQuery.of(context).size.height;
     var width = MediaQuery.of(context).size.width;
 
-    late TextEditingController emailcontroller;
-    late TextEditingController subjectcontroller;
-    late TextEditingController bodycontroller;
-
-    @override
-    void initState() {
-      super.initState();
-      emailcontroller = TextEditingController();
-      subjectcontroller = TextEditingController();
-      bodycontroller = TextEditingController();
-    }
-
-    @override
-    void dispose() {
-      emailcontroller.dispose();
-      subjectcontroller.dispose();
-      bodycontroller.dispose();
-      super.dispose();
-    }
-
-    return Stack(
+    return Scaffold(
+        body: Stack(
       children: [
         Positioned.fill(
             child: Column(
@@ -43,17 +86,11 @@ class _MailState extends State<Mail> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             const Text("Email"),
-            TextField(
-              controller: emailcontroller,
-            ),
+            Text(textEmail),
             const Text("Subject"),
-            TextField(
-              controller: subjectcontroller,
-            ),
+            Text(textSubject),
             const Text("Body"),
-            TextField(
-              controller: bodycontroller,
-            ),
+            Text(textBody),
           ],
         )),
         GestureDetector(
@@ -75,6 +112,6 @@ class _MailState extends State<Mail> {
           ),
         )
       ],
-    );
+    ));
   }
 }
